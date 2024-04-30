@@ -3,16 +3,18 @@ import connectDB from "@/utils/connectDB";
 
 export default async function handler(req, res) {
   try {
-    connectDB();
+    await connectDB();
   } catch (err) {
     console.log(err.message);
-    return res
+
+    res
       .status(500)
-      .json({ status: "failed", massage: "Internal Server Error" });
+      .json({ status: "failed", massage: "not connecting to database" });
+    return;
   }
   if (req.method === "PATCH") {
-    const id = req.query.id;
-    const data = req.body;
+    const id = req.query.customerId;
+    const data = req.body.data;
     try {
       const customer = await Customer.findOne({ _id: id });
       customer.name = data.name;
@@ -23,8 +25,8 @@ export default async function handler(req, res) {
       customer.postalCode = data.postalCode;
       customer.date = data.date;
       customer.products = data.products;
-      customer.updateAt = Date.now();
-      await customer.save();
+      customer.updatedAt = Date.now();
+      customer.save();
       res.status(200).json({ status: "success", data: customer });
     } catch (err) {
       res
